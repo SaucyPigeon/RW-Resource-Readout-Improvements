@@ -14,37 +14,50 @@ namespace ResourceReadout.Patches
 	[HarmonyPatch(typeof(Listing_ResourceReadout))]
 	public static class RimWorld_Listing_ResourceReadout
 	{
+
 //#if DEBUG
-		[HarmonyPatch(nameof(Listing_ResourceReadout.DoCategory))]
+		[HarmonyPatch("DoThingDef")]
 		[HarmonyTranspiler]
-		public static IEnumerable<CodeInstruction> DoCategory_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
+		public static IEnumerable<CodeInstruction> DoThingDef_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
 		{
+#if DEBUG
+			Log.Message("Listing_ResourceReadout.DoCategory_Transpiler - start");
+#endif
 			var mi_GUI_DrawTexture = AccessTools.Method(typeof(GUI), nameof(GUI.DrawTexture), parameters: new[] { typeof(Rect), typeof(Texture) });
 			var mi_Widgets_ButtonInvisible = AccessTools.Method(typeof(Widgets), nameof(Widgets.ButtonInvisible));
+			var fi_TreeNode_ThingCategory_catDef = AccessTools.Field(typeof(TreeNode_ThingCategory), nameof(TreeNode_ThingCategory.catDef));
+			var mi_Patch_SelectAllOnMap = AccessTools.Method(typeof(Loader), nameof(Loader.SelectAllOnMap));
 
-			bool flag = false;
+			var ldarg_0_last = instructions.Where(x => x.IsLdarg(0)).Last();
 
 			foreach (var instruction in instructions)
 			{
-				yield return instruction;
-
-				if (!flag && instruction.Calls(mi_GUI_DrawTexture))
+				if (instruction == ldarg_0_last)
 				{
-					flag = true;
-
-					var jumpToEnd = new Label();
-
 					// if (Widgets.ButtonInvisible(rect, false))
 					// {
-					//     SelectAllOnMap(thingCategoryDef)
+					//     SelectAllOnMap(thingDef)
 					// }
-					yield return new CodeInstruction(OpCodes.Ldloc_1);
+					var jumpToEnd = ilGenerator.DefineLabel();
+
+					yield return new CodeInstruction(OpCodes.Ldloc_2);
 					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
 					yield return new CodeInstruction(OpCodes.Call, mi_Widgets_ButtonInvisible);
+
+					yield return new CodeInstruction(OpCodes.Brfalse_S, jumpToEnd);
+
+					yield return new CodeInstruction(OpCodes.Ldarg_1);
+					yield return new CodeInstruction(OpCodes.Call, mi_Patch_SelectAllOnMap);
+
+					yield return new CodeInstruction(OpCodes.Nop) { labels = new List<Label>() { jumpToEnd } };
 				}
+				yield return instruction;
 			}
+#if DEBUG
+			Log.Message("Listing_ResourceReadout.DoCategory_Transpiler - end");
+#endif
 		}
-//#endif
+		//#endif
 
 
 

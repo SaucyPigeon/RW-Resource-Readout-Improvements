@@ -15,6 +15,27 @@ namespace ResourceReadout
 	{
 		public static NodeOpenTracker NodeOpenTracker = new NodeOpenTracker();
 
+		private static MethodInfo mi_Selector_ShiftIsHeld = AccessTools.PropertyGetter(typeof(Selector), "ShiftIsHeld");
+
+		public static void SelectAllOnMap(ThingDef thingDef)
+		{
+#if DEBUG
+			Log.Message("Select all on map - start");
+#endif
+			var things = Find.CurrentMap.spawnedThings.Where(x => x.def == thingDef && x.IsInAnyStorage());
+
+			var selector = Find.Selector;
+			if (!(bool)mi_Selector_ShiftIsHeld.Invoke(selector, new object[0]))
+			{
+				selector.ClearSelection();
+			}
+			things.Do(x => selector.Select(x));
+
+#if DEBUG
+			Log.Message("Select all on map - end");
+#endif
+		}
+
 		static Loader()
 		{
 			const string Id = "com.saucypigeon.rimworld.mod.resourcereadout";
