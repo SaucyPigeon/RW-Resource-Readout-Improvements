@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Loader.cs" />
+    <Compile Include="Patches\RimWorld_ResourceReadout.cs" />
     <Compile Include="Patches\Verse_TreeNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
