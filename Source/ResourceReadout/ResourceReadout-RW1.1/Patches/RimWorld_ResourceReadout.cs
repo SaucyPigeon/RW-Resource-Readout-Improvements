@@ -9,33 +9,58 @@ using Verse;
 
 namespace ResourceReadout.Patches
 {
-	/*
-	This logging shows that upon game load, the first root ThingCategoryDef treenodes's openBits is set to
-	all positive, whereas other treenodes are all zero. This means that the first node will always be, by
-	default, open.
-
-	The exact cause of this has not been determined.
-	*/
-#if DEBUG
 	[HarmonyPatch(typeof(RimWorld.ResourceReadout))]
 	public static class RimWorld_ResourceReadout
 	{
-		[HarmonyPatch("DoReadoutCategorized")]
-		[HarmonyPrefix]
-		public static void Prefix(List<ThingCategoryDef> ___RootThingCategories)
-		{
-			Log.Message("RimWorld.DoReadoutCategorized_Prefix (start)");
-			foreach (var rootThingCategory in ___RootThingCategories)
-			{
-				Log.Message($"defName: {rootThingCategory.defName}");
-				var treeNode = rootThingCategory.treeNode;
-				var field = AccessTools.Field(typeof(TreeNode_ThingCategory), "openBits");
+		const int openMask = 32;
 
-				int x = (int)field.GetValue(treeNode);
-				Log.Message($"Open bits: {Convert.ToString(x, 2)}");
+		[HarmonyPatch(MethodType.Constructor)]
+		[HarmonyPostfix]
+		public static void Postfix(List<ThingCategoryDef> ___RootThingCategories)
+		{
+//#if DEBUG
+//			Log.Message("RimWorld.ResourceReadout() (start)");
+//#endif
+
+			foreach (var def in ___RootThingCategories)
+			{
+				var node = def.treeNode;
+
+				var tracker = Loader.NodeOpenTracker;
+
+				if (tracker.ContainsNode(node))
+				{
+					node.SetOpen(openMask, tracker.GetValue(node));
+				}
 			}
-			Log.Message("RimWorld.DoReadoutCategorized_Prefix (end)");
+
+//#if DEBUG
+//			Log.Message("RimWorld.ResourceReadout() (end)");
+//#endif
 		}
+
+		/*
+		This logging shows that upon game load, the first root ThingCategoryDef treenodes's openBits is set to
+		all positive, whereas other treenodes are all zero. This means that the first node will always be, by
+		default, open. The exact cause of this has not been determined.
+		*/
+//#if DEBUG
+//		[HarmonyPatch("DoReadoutCategorized")]
+//		[HarmonyPrefix]
+//		public static void Prefix(List<ThingCategoryDef> ___RootThingCategories)
+//		{
+//			Log.Message("RimWorld.DoReadoutCategorized_Prefix (start)");
+//			foreach (var rootThingCategory in ___RootThingCategories)
+//			{
+//				Log.Message($"defName: {rootThingCategory.defName}");
+//				var treeNode = rootThingCategory.treeNode;
+//				var field = AccessTools.Field(typeof(TreeNode_ThingCategory), "openBits");
+
+//				int x = (int)field.GetValue(treeNode);
+//				Log.Message($"Open bits: {Convert.ToString(x, 2)}");
+//			}
+//			Log.Message("RimWorld.DoReadoutCategorized_Prefix (end)");
+//		}
+//#endif
 	}
-#endif
 }

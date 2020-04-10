@@ -13,6 +13,8 @@ namespace ResourceReadout
 	[StaticConstructorOnStartup]
 	public static class Loader
 	{
+		public static NodeOpenTracker NodeOpenTracker = new NodeOpenTracker();
+
 		static Loader()
 		{
 			const string Id = "com.saucypigeon.rimworld.mod.resourcereadout";
@@ -22,6 +24,8 @@ namespace ResourceReadout
 #endif
 			var harmony = new Harmony(Id);
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+			NodeOpenTracker = new NodeOpenTracker();
 		}
 	}
 }
