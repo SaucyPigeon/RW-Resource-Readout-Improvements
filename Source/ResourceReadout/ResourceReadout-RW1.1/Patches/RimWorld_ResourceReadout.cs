@@ -12,7 +12,7 @@ namespace ResourceReadout.Patches
 	[HarmonyPatch(typeof(RimWorld.ResourceReadout))]
 	public static class RimWorld_ResourceReadout
 	{
-		const int openMask = 32;
+		const int openMask = Verse.TreeOpenMasks.ResourceReadout;
 
 		[HarmonyPatch(MethodType.Constructor)]
 		[HarmonyPostfix]
@@ -21,16 +21,20 @@ namespace ResourceReadout.Patches
 //#if DEBUG
 //			Log.Message("RimWorld.ResourceReadout() (start)");
 //#endif
+			var tracker = Loader.NodeOpenTracker;
 
 			foreach (var def in ___RootThingCategories)
 			{
 				var node = def.treeNode;
 
-				var tracker = Loader.NodeOpenTracker;
 
 				if (tracker.ContainsNode(node))
 				{
 					node.SetOpen(openMask, tracker.GetValue(node));
+				}
+				else
+				{
+					node.SetOpen(openMask, false);
 				}
 			}
 

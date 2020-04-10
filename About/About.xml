@@ -24,7 +24,9 @@
 	
 - Now remembers which tabs you had open if you reload a save.
 - Clicking on a resource selects all available on the map.
+- Adds tooltips to the simplified view.
+- "Foods" category is no longer open by default for no reason whatsoever.
 
-Compatible with save games.</description>
+Compatible with save games and mods that add their own ThingCategories.</description>
 	
 </ModMetaData>

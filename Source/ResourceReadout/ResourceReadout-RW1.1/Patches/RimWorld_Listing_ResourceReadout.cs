@@ -12,14 +12,14 @@ namespace ResourceReadout.Patches
 	[HarmonyPatch(typeof(Listing_ResourceReadout))]
 	public static class RimWorld_Listing_ResourceReadout
 	{
-#if DEBUG
-		[HarmonyPatch(nameof(Listing_ResourceReadout.DoCategory))]
-		[HarmonyPrefix]
-		public static void Prefix()
-		{
-			Log.Message("RimWorld.Listing_ResourceReadout_Prefix");
-		}
-#endif
+//#if DEBUG
+//		[HarmonyPatch(nameof(Listing_ResourceReadout.DoCategory))]
+//		[HarmonyPrefix]
+//		public static void Prefix()
+//		{
+//			Log.Message("RimWorld.Listing_ResourceReadout_Prefix");
+//		}
+//#endif
 
 		[HarmonyPatch(nameof(Listing_ResourceReadout.DoCategory))]
 		[HarmonyPostfix]

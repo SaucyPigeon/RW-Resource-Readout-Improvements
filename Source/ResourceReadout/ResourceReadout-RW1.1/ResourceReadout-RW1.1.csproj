@@ -45,6 +45,7 @@
     <Compile Include="Patches\RimWorld_ResourceReadout.cs" />
     <Compile Include="Patches\Verse_Game.cs" />
     <Compile Include="Patches\Verse_TreeNode.cs" />
+    <Compile Include="Patches\Verse_TreeNode_ThingCategory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
