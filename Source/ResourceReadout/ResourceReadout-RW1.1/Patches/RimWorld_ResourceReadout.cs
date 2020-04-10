@@ -16,7 +16,7 @@ namespace ResourceReadout.Patches
 
 		[HarmonyPatch(MethodType.Constructor)]
 		[HarmonyPostfix]
-		public static void Postfix(List<ThingCategoryDef> ___RootThingCategories)
+		public static void Constructor_Postfix(List<ThingCategoryDef> ___RootThingCategories)
 		{
 //#if DEBUG
 //			Log.Message("RimWorld.ResourceReadout() (start)");
@@ -26,7 +26,6 @@ namespace ResourceReadout.Patches
 			foreach (var def in ___RootThingCategories)
 			{
 				var node = def.treeNode;
-
 
 				if (tracker.ContainsNode(node))
 				{
