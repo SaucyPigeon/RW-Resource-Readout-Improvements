@@ -13,8 +13,6 @@ namespace ResourceReadout
 	[StaticConstructorOnStartup]
 	public static class Loader
 	{
-		public static NodeOpenTracker NodeOpenTracker = new NodeOpenTracker();
-
 		private static MethodInfo mi_Selector_ShiftIsHeld = AccessTools.PropertyGetter(typeof(Selector), "ShiftIsHeld");
 
 		public static void SelectAllOnMap(ThingDef thingDef)
@@ -22,9 +20,9 @@ namespace ResourceReadout
 #if DEBUG
 			Log.Message("Select all on map - start");
 #endif
-			var things = Find.CurrentMap.spawnedThings.Where(x => x.def == thingDef && x.IsInAnyStorage());
+			var things = Verse.Find.CurrentMap.spawnedThings.Where(x => x.def == thingDef && x.IsInAnyStorage());
 
-			var selector = Find.Selector;
+			var selector = Verse.Find.Selector;
 			if (!(bool)mi_Selector_ShiftIsHeld.Invoke(selector, new object[0]))
 			{
 				selector.ClearSelection();
@@ -45,8 +43,6 @@ namespace ResourceReadout
 #endif
 			var harmony = new Harmony(Id);
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
-
-			NodeOpenTracker = new NodeOpenTracker();
 		}
 	}
 }

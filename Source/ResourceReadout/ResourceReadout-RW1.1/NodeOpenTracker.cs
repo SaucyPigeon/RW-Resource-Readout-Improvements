@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,28 +9,62 @@ using Verse;
 
 namespace ResourceReadout
 {
-	public class NodeOpenTracker : IExposable
+	public class NodeOpenTracker : IExposable, IEnumerable<string>, ICollection<string>
 	{
-		private Dictionary<string, bool> nodeIsOpen = new Dictionary<string, bool>();
+		private HashSet<string> set = new HashSet<string>();
 
-		public void SetNode(TreeNode_ThingCategory node, int openMask)
+		public int Count => ((ICollection<string>)set).Count;
+
+		public bool IsReadOnly => ((ICollection<string>)set).IsReadOnly;
+
+		public bool Contains(TreeNode_ThingCategory node)
 		{
-			nodeIsOpen[node.Label] = node.IsOpen(openMask);
+			return set.Contains(node.Label);
 		}
 
-		public bool ContainsNode(TreeNode_ThingCategory node)
+		public void Add(TreeNode_ThingCategory node)
 		{
-			return nodeIsOpen.ContainsKey(node.Label);
-		}
-
-		public bool GetValue(TreeNode_ThingCategory node)
-		{
-			return nodeIsOpen[node.Label];
+			set.Add(node.Label);
 		}
 
 		public void ExposeData()
 		{
-			Scribe_Collections.Look(ref nodeIsOpen, "nodeIsOpen", LookMode.Value, LookMode.Value);
+			Scribe_Collections.Look(ref set, "set", LookMode.Value);
+		}
+
+		public IEnumerator<string> GetEnumerator()
+		{
+			return ((IEnumerable<string>)set).GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return ((IEnumerable<string>)set).GetEnumerator();
+		}
+
+		public void Add(string item)
+		{
+			((ICollection<string>)set).Add(item);
+		}
+
+		public void Clear()
+		{
+			((ICollection<string>)set).Clear();
+		}
+
+		public bool Contains(string item)
+		{
+			return ((ICollection<string>)set).Contains(item);
+		}
+
+		public void CopyTo(string[] array, int arrayIndex)
+		{
+			((ICollection<string>)set).CopyTo(array, arrayIndex);
+		}
+
+		public bool Remove(string item)
+		{
+			return ((ICollection<string>)set).Remove(item);
 		}
 	}
 }

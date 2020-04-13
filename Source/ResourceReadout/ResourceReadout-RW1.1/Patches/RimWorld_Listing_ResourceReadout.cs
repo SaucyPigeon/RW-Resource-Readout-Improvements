@@ -16,6 +16,9 @@ namespace ResourceReadout.Patches
 	{
 
 //#if DEBUG
+		/*
+		Add new Widgets.ButtonInvisible that allows user to select all items that are in the colony's stockpiles.
+		*/
 		[HarmonyPatch("DoThingDef")]
 		[HarmonyTranspiler]
 		public static IEnumerable<CodeInstruction> DoThingDef_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
@@ -69,12 +72,16 @@ namespace ResourceReadout.Patches
 //			Log.Message("RimWorld.Listing_ResourceReadout_Postfix (start)");
 //#endif
 
-			if (Loader.NodeOpenTracker == null)
-			{
-				Loader.NodeOpenTracker = new NodeOpenTracker();
-			}
+			//if (Loader.NodeOpenTracker == null)
+			//{
+			//	Loader.NodeOpenTracker = new NodeOpenTracker();
+			//}
 
-			Loader.NodeOpenTracker.SetNode(node, openMask);
+			if (node.IsOpen(openMask))
+			{
+				var gc = Current.Game.GetComponent<ResourceReadout_GameComponent>();
+				gc.NodeOpenTracker.Add(node);
+			}
 
 //#if DEBUG
 //			Log.Message("RimWorld.Listing_ResourceReadout_Postfix (finish)");
