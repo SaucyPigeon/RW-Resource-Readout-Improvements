@@ -9,13 +9,9 @@ using Verse;
 
 namespace ResourceReadout
 {
-	public class NodeOpenTracker : IExposable, IEnumerable<string>, ICollection<string>
+	public class NodeOpenTracker : IExposable, IEnumerable<string>
 	{
 		private HashSet<string> set = new HashSet<string>();
-
-		public int Count => ((ICollection<string>)set).Count;
-
-		public bool IsReadOnly => ((ICollection<string>)set).IsReadOnly;
 
 		public bool Contains(TreeNode_ThingCategory node)
 		{
@@ -25,6 +21,11 @@ namespace ResourceReadout
 		public void Add(TreeNode_ThingCategory node)
 		{
 			set.Add(node.Label);
+		}
+
+		public void Remove(TreeNode_ThingCategory node)
+		{
+			set.Remove(node.Label);
 		}
 
 		public void ExposeData()
@@ -40,31 +41,6 @@ namespace ResourceReadout
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return ((IEnumerable<string>)set).GetEnumerator();
-		}
-
-		public void Add(string item)
-		{
-			((ICollection<string>)set).Add(item);
-		}
-
-		public void Clear()
-		{
-			((ICollection<string>)set).Clear();
-		}
-
-		public bool Contains(string item)
-		{
-			return ((ICollection<string>)set).Contains(item);
-		}
-
-		public void CopyTo(string[] array, int arrayIndex)
-		{
-			((ICollection<string>)set).CopyTo(array, arrayIndex);
-		}
-
-		public bool Remove(string item)
-		{
-			return ((ICollection<string>)set).Remove(item);
 		}
 	}
 }

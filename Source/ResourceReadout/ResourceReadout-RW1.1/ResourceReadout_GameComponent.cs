@@ -47,16 +47,6 @@ namespace ResourceReadout
 		{
 			base.LoadedGame();
 
-#if DEBUG
-			Log.Message("ResourceReadout_GameComponent::LoadedGame");
-
-			Log.Message("Iterating over NodeOpenTracker...");
-
-			foreach (var label in NodeOpenTracker)
-			{
-				Log.Message($"\tSaved: {label}");
-			}
-
 			var rootThingCategories = Find.ResourceReadout.GetRootThingCategories();
 
 			foreach (var def in rootThingCategories)
@@ -64,7 +54,6 @@ namespace ResourceReadout
 				var node = def.treeNode;
 				node.SetOpen(TreeOpenMasks.ResourceReadout, NodeOpenTracker.Contains(node));
 			}
-#endif
 		}
 
 		public override void StartedNewGame()

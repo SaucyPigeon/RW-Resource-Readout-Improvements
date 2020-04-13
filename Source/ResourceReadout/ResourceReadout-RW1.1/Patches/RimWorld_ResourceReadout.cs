@@ -6,74 +6,64 @@ using System.Threading.Tasks;
 using RimWorld;
 using HarmonyLib;
 using Verse;
+using System.Reflection.Emit;
+using UnityEngine;
 
 namespace ResourceReadout.Patches
 {
 	[HarmonyPatch(typeof(RimWorld.ResourceReadout))]
 	public static class RimWorld_ResourceReadout
 	{
+		/*
+		Prevent vanilla bug that makes "Foods" category open by default
+		*/
 		[HarmonyPatch(MethodType.Constructor)]
 		[HarmonyPostfix]
 		public static void Constructor_Postfix(List<ThingCategoryDef> ___RootThingCategories)
 		{
-#if DEBUG
-			Log.Message("RimWorld.ResourceReadout() (start)");
-#endif
-
-			/*
-			Prevent bug that makes "Foods" category open by default
-			*/
 			foreach (var def in ___RootThingCategories)
 			{
 				def.treeNode.SetOpen(TreeOpenMasks.ResourceReadout, false);
 			}
-
-//			if (Current.Game == null)
-//				throw new ArgumentNullException(nameof(Current.Game));
-//			if (Current.Game.GetComponent<ResourceReadout_GameComponent>() == null)
-//				throw new ArgumentNullException("GameComponent");
-
-//			var gc = Current.Game.GetComponent<ResourceReadout_GameComponent>();
-//			var tracker = gc.NodeOpenTracker;
-
-
-//			foreach (var def in ___RootThingCategories)
-//			{
-//				var node = def.treeNode;
-//#if DEBUG
-//				Log.Message($"Setting open, node: {node.Label}, bool: {tracker.Contains(node)}");
-//#endif
-//				node.SetOpen(openMask, tracker.Contains(node));
-
-//			}
-
-			//#if DEBUG
-			//			Log.Message("RimWorld.ResourceReadout() (end)");
-			//#endif
 		}
 
 		/*
-		This logging shows that upon game load, the first root ThingCategoryDef treenodes's openBits is set to
-		all positive, whereas other treenodes are all zero. This means that the first node will always be, by
-		default, open. The exact cause of this has not been determined.
+		Add invisible button to simple view's icons for selecting items.
 		*/
-		//#if DEBUG
-		//		[HarmonyPatch("DoReadoutCategorized")]
-		//		[HarmonyPrefix]
-		//		public static void Prefix(List<ThingCategoryDef> ___RootThingCategories)
-		//		{
-		//			Log.Message("RimWorld.DoReadoutCategorized_Prefix (start)");
-		//			foreach (var rootThingCategory in ___RootThingCategories)
-		//			{
-		//				Log.Message($"defName: {rootThingCategory.defName}");
-		//				var treeNode = rootThingCategory.treeNode;
-		//				var field = AccessTools.Field(typeof(TreeNode_ThingCategory), "openBits");
+		[HarmonyPatch("DrawIcon")]
+		[HarmonyTranspiler]
+		public static IEnumerable<CodeInstruction> DrawIcon_Transpiler(IEnumerable<CodeInstruction> codeInstructions, ILGenerator ilGenerator)
+		{
+			var mi_Widgets_ThingIcon = AccessTools.Method(typeof(Widgets), nameof(Widgets.ThingIcon), parameters: new[] { typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(float) });
+			var mi_Widgets_ButtonInvisible = AccessTools.Method(typeof(Widgets), nameof(Widgets.ButtonInvisible));
 
-		//				int x = (int)field.GetValue(treeNode);
-		//				Log.Message($"Open bits: {Convert.ToString(x, 2)}");
-		//			}
-		//			Log.Message("RimWorld.DoReadoutCategorized_Prefix (end)");
-		//		}
-		//#endif
+			var mi_Patch_SelectAllOnMap = AccessTools.Method(typeof(Loader), nameof(Loader.SelectAllOnMap));
+
+			foreach (var instruction in codeInstructions)
+			{
+				yield return instruction;
+
+				if (instruction.Calls(mi_Widgets_ThingIcon))
+				{
+					//if (Widgets.ButtonInvisible(rect, false)
+					//{
+					//	SelectAllOnMap(thingDef)
+					//}
+					
+					var jumpToEnd = ilGenerator.DefineLabel();
+
+					yield return new CodeInstruction(OpCodes.Ldloc_0);
+					yield return new CodeInstruction(OpCodes.Ldc_I4_0);
+					yield return new CodeInstruction(OpCodes.Call, mi_Widgets_ButtonInvisible);
+
+					yield return new CodeInstruction(OpCodes.Brfalse_S, jumpToEnd);
+
+					yield return new CodeInstruction(OpCodes.Ldarg_3);
+					yield return new CodeInstruction(OpCodes.Call, mi_Patch_SelectAllOnMap);
+
+					yield return new CodeInstruction(OpCodes.Nop) { labels = new List<Label>() { jumpToEnd } };
+				}
+			}
+		}
 	}
 }

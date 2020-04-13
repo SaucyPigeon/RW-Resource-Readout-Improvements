@@ -14,8 +14,6 @@ namespace ResourceReadout.Patches
 	[HarmonyPatch(typeof(Listing_ResourceReadout))]
 	public static class RimWorld_Listing_ResourceReadout
 	{
-
-//#if DEBUG
 		/*
 		Add new Widgets.ButtonInvisible that allows user to select all items that are in the colony's stockpiles.
 		*/
@@ -23,12 +21,7 @@ namespace ResourceReadout.Patches
 		[HarmonyTranspiler]
 		public static IEnumerable<CodeInstruction> DoThingDef_Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator ilGenerator)
 		{
-#if DEBUG
-			Log.Message("Listing_ResourceReadout.DoCategory_Transpiler - start");
-#endif
-			var mi_GUI_DrawTexture = AccessTools.Method(typeof(GUI), nameof(GUI.DrawTexture), parameters: new[] { typeof(Rect), typeof(Texture) });
 			var mi_Widgets_ButtonInvisible = AccessTools.Method(typeof(Widgets), nameof(Widgets.ButtonInvisible));
-			var fi_TreeNode_ThingCategory_catDef = AccessTools.Field(typeof(TreeNode_ThingCategory), nameof(TreeNode_ThingCategory.catDef));
 			var mi_Patch_SelectAllOnMap = AccessTools.Method(typeof(Loader), nameof(Loader.SelectAllOnMap));
 
 			var ldarg_0_last = instructions.Where(x => x.IsLdarg(0)).Last();
@@ -56,36 +49,25 @@ namespace ResourceReadout.Patches
 				}
 				yield return instruction;
 			}
-#if DEBUG
-			Log.Message("Listing_ResourceReadout.DoCategory_Transpiler - end");
-#endif
 		}
-		//#endif
 
-
-
+		/*
+		Update which nodes are open in the resource readout.
+		*/
 		[HarmonyPatch(nameof(Listing_ResourceReadout.DoCategory))]
 		[HarmonyPostfix]
 		public static void DoCategory_Postfix(TreeNode_ThingCategory node, int openMask)
 		{
-//#if DEBUG
-//			Log.Message("RimWorld.Listing_ResourceReadout_Postfix (start)");
-//#endif
-
-			//if (Loader.NodeOpenTracker == null)
-			//{
-			//	Loader.NodeOpenTracker = new NodeOpenTracker();
-			//}
-
+			var gc = Current.Game.GetComponent<ResourceReadout_GameComponent>();
+			
 			if (node.IsOpen(openMask))
 			{
-				var gc = Current.Game.GetComponent<ResourceReadout_GameComponent>();
 				gc.NodeOpenTracker.Add(node);
 			}
-
-//#if DEBUG
-//			Log.Message("RimWorld.Listing_ResourceReadout_Postfix (finish)");
-//#endif
+			else
+			{
+				gc.NodeOpenTracker.Remove(node);
+			}
 		}
 	}
 }

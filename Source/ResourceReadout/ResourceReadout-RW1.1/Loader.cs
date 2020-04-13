@@ -15,11 +15,12 @@ namespace ResourceReadout
 	{
 		private static MethodInfo mi_Selector_ShiftIsHeld = AccessTools.PropertyGetter(typeof(Selector), "ShiftIsHeld");
 
+		/*
+		Select all instances of the thingDef in the current map's stockpiles.
+		Supports shift-click for adding to selection.
+		*/
 		public static void SelectAllOnMap(ThingDef thingDef)
 		{
-#if DEBUG
-			Log.Message("Select all on map - start");
-#endif
 			var things = Verse.Find.CurrentMap.spawnedThings.Where(x => x.def == thingDef && x.IsInAnyStorage());
 
 			var selector = Verse.Find.Selector;
@@ -28,10 +29,6 @@ namespace ResourceReadout
 				selector.ClearSelection();
 			}
 			things.Do(x => selector.Select(x));
-
-#if DEBUG
-			Log.Message("Select all on map - end");
-#endif
 		}
 
 		static Loader()
